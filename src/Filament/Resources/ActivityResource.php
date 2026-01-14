@@ -3,7 +3,6 @@
 namespace TomatoPHP\FilamentLogger\Filament\Resources;
 
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use TomatoPHP\FilamentLogger\Filament\Resources\ActivityResource\Pages;
 use TomatoPHP\FilamentLogger\Filament\Resources\ActivityResource\RelationManagers;
 use TomatoPHP\FilamentLogger\Models\Activity;
@@ -12,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use BackedEnum;
@@ -42,40 +42,41 @@ class ActivityResource extends Resource
         return trans('filament-logger::messages.single');
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist->schema([
-            TextEntry::make('model.name')
-                ->label(trans('filament-logger::messages.columns.model')),
-            TextEntry::make('response_time')
-                ->numeric()
-                ->label(trans('filament-logger::messages.columns.response_time')),
-            TextEntry::make('status')
-                ->label(trans('filament-logger::messages.columns.status'))
-                ->numeric(),
-            TextEntry::make('method')
-                ->label(trans('filament-logger::messages.columns.method')),
-            TextEntry::make('url')
-                ->label(trans('filament-logger::messages.columns.url')),
-            TextEntry::make('referer')
-                ->label(trans('filament-logger::messages.columns.referer')),
-            TextEntry::make('query')
-                ->label(trans('filament-logger::messages.columns.query')),
-            TextEntry::make('remote_address')
-                ->label(trans('filament-logger::messages.columns.remote_address')),
-            TextEntry::make('user_agent')
-                ->label(trans('filament-logger::messages.columns.user_agent'))
-                ->columnSpanFull(),
-            TextEntry::make('response')
-                ->label(trans('filament-logger::messages.columns.response')),
-            TextEntry::make('level')
-                ->default('info')
-                ->label(trans('filament-logger::messages.columns.level')),
-            TextEntry::make('user')
-                ->label(trans('filament-logger::messages.columns.user')),
-            TextEntry::make('log')
-                ->label(trans('filament-logger::messages.columns.log')),
-        ]);
+        return $schema
+            ->components([
+                TextEntry::make('model.name')
+                    ->label(trans('filament-logger::messages.columns.model')),
+                TextEntry::make('response_time')
+                    ->numeric()
+                    ->label(trans('filament-logger::messages.columns.response_time')),
+                TextEntry::make('status')
+                    ->label(trans('filament-logger::messages.columns.status'))
+                    ->numeric(),
+                TextEntry::make('method')
+                    ->label(trans('filament-logger::messages.columns.method')),
+                TextEntry::make('url')
+                    ->label(trans('filament-logger::messages.columns.url')),
+                TextEntry::make('referer')
+                    ->label(trans('filament-logger::messages.columns.referer')),
+                TextEntry::make('query')
+                    ->label(trans('filament-logger::messages.columns.query')),
+                TextEntry::make('remote_address')
+                    ->label(trans('filament-logger::messages.columns.remote_address')),
+                TextEntry::make('user_agent')
+                    ->label(trans('filament-logger::messages.columns.user_agent'))
+                    ->columnSpanFull(),
+                TextEntry::make('response')
+                    ->label(trans('filament-logger::messages.columns.response')),
+                TextEntry::make('level')
+                    ->default('info')
+                    ->label(trans('filament-logger::messages.columns.level')),
+                TextEntry::make('user')
+                    ->label(trans('filament-logger::messages.columns.user')),
+                TextEntry::make('log')
+                    ->label(trans('filament-logger::messages.columns.log')),
+            ]);
     }
 
     public static function table(Table $table): Table
