@@ -2,36 +2,93 @@
 
 namespace TomatoPHP\FilamentLogger;
 
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Illuminate\Support\ServiceProvider;
 use TomatoPHP\FilamentLogger\EventServiceProvider;
 use TomatoPHP\FilamentLogger\Services\Benchmark;
 
-class FilamentLoggerServiceProvider extends PackageServiceProvider
-{
-    public static string $name = 'filament-logger';
-
-    public function configurePackage(Package $package): void
+if (class_exists(\Spatie\LaravelPackageTools\PackageServiceProvider::class)) {
+    class FilamentLoggerServiceProvider extends \Spatie\LaravelPackageTools\PackageServiceProvider
     {
-        $package
-            ->name(static::$name)
-            ->hasConfigFile('filament-logger')
-            ->hasMigrations()
-            ->hasTranslations()
-            ->hasCommand(\TomatoPHP\FilamentLogger\Console\FilamentLoggerInstall::class);
+        public static string $name = 'filament-logger';
+
+        public function configurePackage(\Spatie\LaravelPackageTools\Package $package): void
+        {
+            $package
+                ->name(static::$name)
+                ->hasConfigFile('filament-logger')
+                ->hasMigrations()
+                ->hasTranslations()
+                ->hasCommand(\TomatoPHP\FilamentLogger\Console\FilamentLoggerInstall::class);
+        }
+
+        public function packageRegistered(): void
+        {
+            $this->registerServices();
+        }
+
+        public function packageBooted(): void
+        {
+            $this->bootServices();
+        }
+
+        protected function registerServices(): void
+        {
+            Benchmark::start(config('filament-logger.request.benchmark', 'application'));
+
+            $this->app->bind('filament-logger', function () {
+                return new \TomatoPHP\FilamentLogger\Services\LoggerServices();
+            });
+        }
+
+        protected function bootServices(): void
+        {
+            $this->app->register(EventServiceProvider::class);
+        }
     }
-
-    public function packageRegistered(): void
+} else {
+    class FilamentLoggerServiceProvider extends ServiceProvider
     {
-        Benchmark::start(config('filament-logger.request.benchmark', 'application'));
+        public function register(): void
+        {
+            //Register generate command
+            $this->commands([
+               \TomatoPHP\FilamentLogger\Console\FilamentLoggerInstall::class,
+            ]);
 
-        $this->app->bind('filament-logger', function () {
-            return new \TomatoPHP\FilamentLogger\Services\LoggerServices();
-        });
-    }
+            //Register Config file
+            $this->mergeConfigFrom(__DIR__.'/../config/filament-logger.php', 'filament-logger');
 
-    public function packageBooted(): void
-    {
-        $this->app->register(EventServiceProvider::class);
+            //Publish Config
+            $this->publishes([
+               __DIR__.'/../config/filament-logger.php' => config_path('filament-logger.php'),
+            ], 'filament-logger-config');
+
+            //Register Migrations
+            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
+            //Publish Migrations
+            $this->publishes([
+               __DIR__.'/../database/migrations' => database_path('migrations'),
+            ], 'filament-logger-migrations');
+
+            //Register Langs
+            $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'filament-logger');
+
+            //Publish Lang
+            $this->publishes([
+               __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-logger'),
+            ], 'filament-logger-lang');
+
+            Benchmark::start(config('filament-logger.request.benchmark', 'application'));
+
+            $this->app->bind('filament-logger', function () {
+                return new \TomatoPHP\FilamentLogger\Services\LoggerServices();
+            });
+        }
+
+        public function boot(): void
+        {
+            $this->app->register(EventServiceProvider::class);
+        }
     }
 }
