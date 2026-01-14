@@ -17,9 +17,13 @@ class FilamentLoggerPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->resources([
-            ActivityResource::class
-        ]);
+        // Only register the base ActivityResource if no custom one exists
+        // This allows applications to extend it if needed
+        if (!class_exists(\App\Filament\Resources\Activities\ActivityResource::class)) {
+            $panel->resources([
+                ActivityResource::class
+            ]);
+        }
     }
 
     public function boot(Panel $panel): void
