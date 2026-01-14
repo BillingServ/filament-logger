@@ -14,12 +14,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BackedEnum;
 
 class ActivityResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-exclamation-triangle';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-exclamation-triangle';
 
     public static function getNavigationGroup(): ?string
     {
